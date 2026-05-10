@@ -5,7 +5,7 @@
 const axios   = require('axios');
 const express = require('express');
 const TelegramBot = require('node-telegram-bot-api');
-const db      = require('./db');
+//const db      = require('./db');
 const mysql   = require('mysql');
 const fs      = require('fs');
 const https   = require('https');
@@ -13,33 +13,8 @@ const tokens  = require('./tokens');
 
 console.log("✅ MySQL module loaded successfully");
 
-// ───── Load / watch callbacks.json ───────────────────────────────────────
-let callbackToServer = {};
-let callbackToInternationalServer = {};
-
-function loadConfig() {
-    const raw = fs.readFileSync('./callbacks.json');
-    const config = JSON.parse(raw);
-
-    callbackToServer = config.callbackToServer;
-    callbackToInternationalServer = config.callbackToInternationalServer;
-
-    console.log('✅ Callbacks loaded');
-}
-
-loadConfig();
-
-fs.watchFile('./callbacks.json', { interval: 2000 }, () => {
-    try {
-        console.log('⚡ callbacks.json updated, reloading...');
-        loadConfig();
-    } catch (err) {
-        console.error('❌ Failed to reload callbacks.json:', err);
-    }
-});
-
 // ───── Bot initialisation ─────────────────────────────────────────────────
-const bot = new TelegramBot(tokens.royalDNS, {
+const bot = new TelegramBot(tokens.Morsify, {
     polling: {
         interval: 300,
         autoStart: true,

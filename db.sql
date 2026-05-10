@@ -1,0 +1,17 @@
+CREATE TABLE accounts (
+    UserID INT PRIMARY KEY,  -- Telegram ID
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    Username VARCHAR(50),
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE visit (
+    LogID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    Username VARCHAR(50),
+    UsedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserID) REFERENCES accounts(UserID) ON DELETE CASCADE
+);

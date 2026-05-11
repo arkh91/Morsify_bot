@@ -106,6 +106,33 @@ function morseToText(morse) {
         .join(' ');
 }
 
+// ─────────────────────────────────────────────────────────────
+// Database Visit Logger
+// ─────────────────────────────────────────────────────────────
+
+function logVisit(msg) {
+    if (!msg || !msg.from) return;
+
+    const user = msg.from;
+
+    const sql = `
+        INSERT INTO visit
+        (UserID, FirstName, LastName, Username)
+        VALUES (?, ?, ?, ?)
+    `;
+
+    db.query(sql, [
+        user.id,
+        user.first_name || null,
+        user.last_name || null,
+        user.username || null
+    ], (err) => {
+        if (err) {
+            console.error('Visit log error:', err);
+        }
+    });
+}
+
 // ─────────────────────────────────────────────
 // /start command
 // ─────────────────────────────────────────────
@@ -200,6 +227,8 @@ bot.onText(/\/start/, async (msg) => {
 // ─────────────────────────────────────────────
 
 bot.on('message', async (msg) => {
+
+    logVisit(msg);
 
     // Ignore commands
     if (!msg.text || msg.text.startsWith('/')) return;

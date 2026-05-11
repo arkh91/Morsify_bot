@@ -5,13 +5,13 @@
 const axios   = require('axios');
 const express = require('express');
 const TelegramBot = require('node-telegram-bot-api');
-//const db      = require('./db');
-const mysql   = require('mysql');
+const db      = require('./db');
 const fs      = require('fs');
 const https   = require('https');
 const tokens  = require('./tokens');
 
 console.log("✅ MySQL module loaded successfully");
+
 
 // ───── Bot initialisation ─────────────────────────────────────────────────
 const bot = new TelegramBot(tokens.Morsify, {
@@ -106,9 +106,98 @@ function morseToText(morse) {
         .join(' ');
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Message Handler
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// /start command
+// ─────────────────────────────────────────────
+
+bot.onText(/\/start/, async (msg) => {
+
+    console.log('✅ /start triggered');
+
+    const chatId = msg.chat.id;
+
+    const userId    = msg.from.id;
+    const firstName = msg.from.first_name || 'User';
+    const lastName  = msg.from.last_name || '';
+    const username  = msg.from.username || '';
+
+   // console.log({
+     //   userId,
+     //   firstName,
+     //   lastName,
+     //   username
+    //});
+
+    db.query(
+        'SELECT UserID FROM accounts WHERE UserID = ?',
+        [userId],
+        (selectErr, results) => {
+
+            if (selectErr) {
+
+                console.error('SELECT ERROR:', selectErr);
+
+                return bot.sendMessage(
+                    chatId,
+                    '❌ Database select error.'
+                );
+            }
+
+            console.log('SELECT RESULTS:', results);
+
+            // User does not exist
+            if (results.length === 0) {
+
+                console.log('⚡ Inserting new user...');
+
+                db.query(
+                    `INSERT INTO accounts
+                    (UserID, FirstName, LastName, Username)
+                    VALUES (?, ?, ?, ?)`,
+                    [
+                        userId,
+                        firstName,
+                        lastName,
+                        username
+                    ],
+                    (insertErr, insertResult) => {
+
+                        if (insertErr) {
+
+                            //console.error('INSERT ERROR:', insertErr);
+
+                            return bot.sendMessage(
+                                chatId,
+                                '❌ Failed to create account.'
+                            );
+                        }
+
+                        //console.log('✅ INSERT SUCCESS:', insertResult);
+
+                        bot.sendMessage(
+                            chatId,
+                            `Welcome ${firstName}! 👋`
+                        );
+                    }
+                );
+
+            } else {
+
+                console.log('✅ User already exists');
+
+                bot.sendMessage(
+                    chatId,
+                    ` Welcome back ${firstName}! 👋`
+                );
+            }
+        }
+    );
+});
+
+
+// ─────────────────────────────────────────────
+// Message translator
+// ─────────────────────────────────────────────
 
 bot.on('message', async (msg) => {
 

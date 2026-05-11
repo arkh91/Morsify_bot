@@ -1,14 +1,25 @@
 // db.js
-const mysql = require('mysql2/promise');
+const mysql = require('mysql');
 
-const pool = mysql.createPool({
+const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'TEST',
-    password: 'TEST',
-    database: 'TEST',
+    user: 'root',
+    password: 'Test',
+    database: 'Morsify',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
 });
 
-module.exports = pool;
+connection.connect((err) => {
+
+    if (err) {
+        console.error('❌ MySQL Connection Error:', err);
+        return;
+    }
+
+    console.log('✅ Connected to MySQL');
+});
+
+module.exports = connection;
+
